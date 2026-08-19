@@ -43,6 +43,29 @@ if ($ValidateOnly) {
     exit 0
 }
 
+if (-not $env:VOXCPM_SSH_PASSWORD) {
+    Write-Host "首次使用：請輸入伺服器密碼。密碼將以明文儲存在本機 .env。" -ForegroundColor Yellow
+    $securePassword = Read-Host "SSH 密碼" -AsSecureString
+    $passwordPointer = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($securePassword)
+    try {
+        $plainPassword = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($passwordPointer)
+    }
+    finally {
+        [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($passwordPointer)
+    }
+
+    if (-not $plainPassword) {
+        Write-Host "[錯誤] 密碼不可為空。" -ForegroundColor Red
+        exit 3
+    }
+
+    $envContent = "# Local-only plaintext secret. This file is ignored by Git.`r`nVOXCPM_SSH_PASSWORD=$plainPassword`r`n"
+    [System.IO.File]::WriteAllText($envFile, $envContent, [System.Text.UTF8Encoding]::new($true))
+    [Environment]::SetEnvironmentVariable("VOXCPM_SSH_PASSWORD", $plainPassword, "Process")
+    $plainPassword = $null
+    Write-Host "密碼已儲存至本機 .env；後續啟動將自動登入。" -ForegroundColor DarkGreen
+}
+
 if (-not (Get-Command ssh.exe -ErrorAction SilentlyContinue)) {
     Write-Host "[錯誤] 找不到 Windows OpenSSH Client。" -ForegroundColor Red
     Write-Host "請從 Windows『選用功能』安裝 OpenSSH Client。"
@@ -100,6 +123,7 @@ Start-Process powershell.exe -WindowStyle Hidden -ArgumentList $waitArguments | 
 $forward = "${localPort}:127.0.0.1:${remotePort}"
 $remoteCommand = "cd ~/voxcpm2-studio && git pull --ff-only && bash scripts/start-server.sh"
 $sshArguments = @(
+    "-q"
     "-o", "ExitOnForwardFailure=yes"
     "-o", "ServerAliveInterval=30"
     "-o", "StrictHostKeyChecking=accept-new"
