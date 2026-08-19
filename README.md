@@ -2,6 +2,8 @@
 
 以 FastAPI 與原生 HTML 製作的 VoxCPM2 操作介面，提供聲音設計、可控聲音複製及極致複製。
 
+長文模式支援最多 50,000 字元，會依標點自動分段、逐段生成、插入可調整的段間停頓，再合併成單一 WAV；介面會顯示分段進度。
+
 ## 在 172.16.0.103 啟動
 
 ### Windows 一鍵啟動（建議）
@@ -62,6 +64,7 @@ ssh -L 8808:127.0.0.1:8808 llai@172.16.0.103
 
 - `GET /api/status`：伺服器及模型狀態
 - `POST /api/generate`：建立 WAV
+- `GET /api/jobs/{job_id}`：長文工作的分段進度與結果
 - `GET /api/audio/{filename}`：播放或下載結果
 
 產生的音檔位於 `outputs/`。可用 `VOXCPM_OUTPUT_DIR` 指定其他位置。

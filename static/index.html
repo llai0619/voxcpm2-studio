@@ -101,13 +101,33 @@
       <section class="panel composer">
         <div class="section-head">
           <div><span class="step">03</span><h2>輸入文字</h2></div>
-          <span class="count"><b id="charCount">0</b> / 2000</span>
+          <span class="count"><b id="charCount">0</b> / <span id="charMax">2000</span></span>
         </div>
         <textarea id="targetText" name="text" maxlength="2000" required placeholder="輸入想要轉換成語音的內容…"></textarea>
+        <div class="long-form-toggle">
+          <label class="check">
+            <input id="longForm" name="long_form" type="checkbox"><span></span>
+            <strong>長文模式</strong>
+          </label>
+          <small>自動分段生成並合併，最多 50,000 字元</small>
+        </div>
+        <div class="long-options" id="longOptions" hidden>
+          <label>每段目標字數
+            <input id="segmentChars" name="segment_chars" type="number" min="100" max="800" value="400">
+          </label>
+          <label>段間停頓（毫秒）
+            <input id="pauseMs" name="pause_ms" type="number" min="0" max="2000" value="250">
+          </label>
+        </div>
         <button class="generate" id="generateButton" type="submit">
           <span class="button-label"><i>▶</i> 生成語音</span>
-          <span class="button-loading"><i></i> 正在生成，請稍候</span>
+          <span class="button-loading"><i></i> <b id="loadingText">正在生成，請稍候</b></span>
         </button>
+
+        <div class="progress-card" id="progressCard" hidden>
+          <div><strong id="progressLabel">準備長文工作</strong><span id="progressPercent">0%</span></div>
+          <div class="progress-track"><i id="progressBar"></i></div>
+        </div>
 
         <div class="result" id="result" hidden>
           <div class="result-head">
