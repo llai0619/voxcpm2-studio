@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#111317">
+  <title>VoxCPM2 Studio</title>
+  <link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="VoxCPM2 Studio 首頁">
+        <span class="brand-mark"><i></i><i></i><i></i><i></i><i></i></span>
+        <span>VoxCPM2 <b>Studio</b></span>
+      </a>
+      <div class="status" id="serverStatus"><span></span><em>正在連線</em></div>
+    </header>
+
+    <section class="hero">
+      <p class="eyebrow">VOICE SYNTHESIS WORKSPACE</p>
+      <h1>讓文字，擁有<span>聲音。</span></h1>
+      <p class="lede">設計全新聲線，或用一段錄音複製熟悉的音色。</p>
+    </section>
+
+    <form id="studioForm" class="workspace">
+      <section class="panel controls">
+        <div class="section-head">
+          <div><span class="step">01</span><h2>生成模式</h2></div>
+        </div>
+        <div class="mode-grid" role="radiogroup" aria-label="生成模式">
+          <label class="mode-card active">
+            <input type="radio" name="mode" value="design" checked>
+            <span class="mode-icon">✦</span>
+            <strong>聲音設計</strong><small>以文字描述創造聲線</small>
+          </label>
+          <label class="mode-card">
+            <input type="radio" name="mode" value="clone">
+            <span class="mode-icon">◎</span>
+            <strong>聲音複製</strong><small>保留參考音檔音色</small>
+          </label>
+          <label class="mode-card">
+            <input type="radio" name="mode" value="ultimate">
+            <span class="mode-icon">≋</span>
+            <strong>極致複製</strong><small>延續語氣與節奏細節</small>
+          </label>
+        </div>
+
+        <div class="section-head second">
+          <div><span class="step">02</span><h2>聲音設定</h2></div>
+        </div>
+
+        <div class="field" id="referenceField" hidden>
+          <label>參考音檔 <span class="required">必要</span></label>
+          <div class="dropzone" id="dropzone">
+            <input id="referenceAudio" name="reference_audio" type="file" accept="audio/*">
+            <div class="drop-copy" id="dropCopy">
+              <span class="upload-icon">↥</span>
+              <strong>拖曳音檔至此，或點擊選擇</strong>
+              <small>WAV、MP3、FLAC、M4A、OGG、WebM · 最大 30 MB</small>
+            </div>
+            <audio id="referencePreview" controls hidden></audio>
+          </div>
+          <button class="record-button" id="recordButton" type="button"><span></span> 使用麥克風錄音</button>
+        </div>
+
+        <div class="field" id="promptField" hidden>
+          <label for="promptText">參考音檔逐字稿 <span class="required">必要</span></label>
+          <textarea id="promptText" name="prompt_text" rows="3" maxlength="2000" placeholder="請輸入參考音檔中實際說出的內容…"></textarea>
+          <p class="hint">逐字稿需與參考音訊一致，才能延續原始語氣及節奏。</p>
+        </div>
+
+        <div class="field" id="controlField">
+          <label for="control">聲音描述 <span>選填</span></label>
+          <textarea id="control" name="control" rows="3" maxlength="500" placeholder="例如：成熟溫暖的女性聲音，語速從容，帶著輕微笑意…"></textarea>
+          <div class="chips">
+            <button type="button" data-prompt="年輕女性，溫柔甜美，語速稍慢">溫柔女聲</button>
+            <button type="button" data-prompt="沉穩成熟的男性聲音，清晰而有權威感">沉穩男聲</button>
+            <button type="button" data-prompt="充滿活力與興奮，語速明快">活力播報</button>
+          </div>
+        </div>
+
+        <details class="advanced">
+          <summary>進階設定 <span>＋</span></summary>
+          <div class="advanced-grid">
+            <label>CFG 引導強度 <output id="cfgOutput">2.0</output>
+              <input id="cfgValue" name="cfg_value" type="range" min="1" max="3" step="0.1" value="2">
+            </label>
+            <label>生成步數 <output id="stepsOutput">10</output>
+              <input id="steps" name="inference_timesteps" type="range" min="1" max="50" step="1" value="10">
+            </label>
+            <label class="seed-label">隨機種子
+              <input name="seed" type="number" min="0" max="2147483647" placeholder="留空為隨機">
+            </label>
+            <label class="check"><input name="normalize" type="checkbox"><span></span>文字正規化</label>
+            <label class="check"><input name="denoise" type="checkbox"><span></span>參考音檔降噪</label>
+          </div>
+        </details>
+      </section>
+
+      <section class="panel composer">
+        <div class="section-head">
+          <div><span class="step">03</span><h2>輸入文字</h2></div>
+          <span class="count"><b id="charCount">0</b> / 2000</span>
+        </div>
+        <textarea id="targetText" name="text" maxlength="2000" required placeholder="輸入想要轉換成語音的內容…"></textarea>
+        <button class="generate" id="generateButton" type="submit">
+          <span class="button-label"><i>▶</i> 生成語音</span>
+          <span class="button-loading"><i></i> 正在生成，請稍候</span>
+        </button>
+
+        <div class="result" id="result" hidden>
+          <div class="result-head">
+            <div><span class="success">✓</span><strong>語音已完成</strong></div>
+            <a id="downloadLink" download>下載 WAV ↧</a>
+          </div>
+          <audio id="resultAudio" controls></audio>
+        </div>
+        <div class="error" id="errorBox" role="alert" hidden></div>
+
+        <div class="empty-state" id="emptyState">
+          <div class="sound-orbit"><span></span><i></i><i></i><i></i></div>
+          <strong>你的聲音會出現在這裡</strong>
+          <p>輸入文字並選擇生成方式，即可開始。</p>
+        </div>
+      </section>
+    </form>
+    <footer>VoxCPM2 · 在你的伺服器上運行</footer>
+  </main>
+  <script src="/static/app.js" defer></script>
+</body>
+</html>
