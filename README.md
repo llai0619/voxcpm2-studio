@@ -4,6 +4,26 @@
 
 ## 在 172.16.0.103 啟動
 
+### Windows 一鍵啟動（建議）
+
+下載或 clone 本專案後，直接雙擊 `start-voxcpm2.bat`。它會：
+
+1. 建立到 `llai@172.16.0.103` 的 SSH tunnel。
+2. 更新伺服器上的專案。
+3. 使用 `/home/llai/miniforge3/envs/voxcpm2/bin/python3.11`。
+4. 檢查相依套件、啟動服務並開啟瀏覽器。
+
+依畫面輸入 SSH 密碼，並在使用期間保持 BAT 視窗開啟。按 `Ctrl+C` 可停止服務。
+
+第一次使用前，伺服器需已有專案：
+
+```bash
+cd ~
+git clone https://github.com/llai0619/voxcpm2-studio.git
+```
+
+### 手動啟動
+
 先進入已安裝 VoxCPM2 的 Python/Conda 環境，再安裝 Web 端相依套件：
 
 ```bash
