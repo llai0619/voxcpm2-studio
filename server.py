@@ -25,6 +25,7 @@ STATIC_DIR = BASE_DIR / "static"
 OUTPUT_DIR = Path(os.getenv("VOXCPM_OUTPUT_DIR", BASE_DIR / "outputs")).resolve()
 MODEL_ID = os.getenv("VOXCPM_MODEL", "openbmb/VoxCPM2")
 DEVICE = os.getenv("VOXCPM_DEVICE", "auto")
+BUILD_VERSION = os.getenv("VOXCPM_BUILD", "development")
 MAX_UPLOAD_BYTES = 30 * 1024 * 1024
 ALLOWED_SUFFIXES = {".wav", ".mp3", ".flac", ".m4a", ".ogg", ".webm"}
 SHORT_TEXT_LIMIT = 2000
@@ -91,6 +92,16 @@ app = FastAPI(title="VoxCPM2 Studio", lifespan=lifespan)
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 
+@app.middleware("http")
+async def disable_ui_cache(request, call_next):
+    response = await call_next(request)
+    if request.url.path == "/" or request.url.path.startswith("/static/"):
+        response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+    return response
+
+
 @app.get("/")
 async def index():
     return FileResponse(STATIC_DIR / "index.html")
@@ -103,6 +114,8 @@ async def status():
         "loading": state.lock.locked() and state.model is None,
         "model": MODEL_ID,
         "device": DEVICE,
+        "version": BUILD_VERSION,
+        "long_form": True,
         "error": state.error,
     }
 

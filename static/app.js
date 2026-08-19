@@ -152,6 +152,7 @@ async function checkStatus() {
   try {
     const response = await fetch('/api/status');
     const info = await response.json();
+    document.querySelector('#buildVersion').textContent = `版本 ${info.version || 'unknown'}`;
     status.className = `status ${info.error ? 'error' : 'ready'}`;
     status.querySelector('em').textContent = info.error ? '模型需檢查' : (info.ready ? '模型已就緒' : '伺服器已連線');
   } catch { status.className = 'status error'; status.querySelector('em').textContent = '伺服器離線'; }
